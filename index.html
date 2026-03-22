@@ -45,7 +45,7 @@ box-sizing: border-box;
 }
 
   button {
-    width: 100%;
+    width: 95%;
     box-sizing: border-box;
     padding: 14px;
     background: #4CAF50;
@@ -59,8 +59,7 @@ box-sizing: border-box;
     
   }
 
-<button onclick="backup()" style="margin-bottom: 12px;">バックアップ保存</button>
-<button onclick="restore()">バックアップ読み込み</button>
+
   
   button:active {
     background: #45a049;
@@ -121,6 +120,8 @@ box-sizing: border-box;
   <!-- バックアップ -->
   <div class="card">
     <button onclick="backup()">バックアップ保存</button>
+    <button onclick="restore()">バックアップ読み込み</button>
+    <button onclick="backup()" style="margin-bottom: 12px;">バックアップ保存</button>
     <button onclick="restore()">バックアップ読み込み</button>
     <input type="file" id="fileInput" style="display:none" onchange="restoreFile(event)">
   </div>
