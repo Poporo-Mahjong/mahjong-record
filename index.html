@@ -32,17 +32,16 @@
   }
 
   input {
-   width: 100%;
-box-sizing: border-box;
-max-width: 400px;
-padding: 14px;
-margin: 10px auto;
-border-radius: 10px;
-border: 1px solid #ccc;
-font-size: 18px;
-display: block;
-box-sizing: border-box;
-}
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 400px;
+    padding: 14px;
+    margin: 10px auto;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 18px;
+    display: block;
+  }
 
   button {
     width: 100%;
@@ -55,14 +54,26 @@ box-sizing: border-box;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
-       
-    
   }
 
-
-  
   button:active {
     background: #45a049;
+  }
+
+  .small-btn {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 14px;
+    margin-right: 6px;
+    border-radius: 6px;
+  }
+
+  .edit-btn {
+    background: #2196F3;
+  }
+
+  .delete-btn {
+    background: #f44336;
   }
 
   p {
@@ -117,6 +128,12 @@ box-sizing: border-box;
     <canvas id="pieChart" height="200"></canvas>
   </div>
 
+  <!-- 一覧表示 -->
+  <div class="card">
+    <h2>対局一覧</h2>
+    <div id="list"></div>
+  </div>
+
   <!-- バックアップ -->
   <div class="card">
     <button onclick="backup()">バックアップ保存</button>
@@ -124,10 +141,9 @@ box-sizing: border-box;
     <input type="file" id="fileInput" style="display:none" onchange="restoreFile(event)">
   </div>
 
-
 </div>
 
-<!-- Chart.js 読み込み -->
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
@@ -149,7 +165,7 @@ box-sizing: border-box;
     updateStats();
   }
 
-  // 成績更新（期間フィルタ対応）
+  // 成績更新
   function updateStats() {
     const from = document.getElementById("from")?.value;
     const to = document.getElementById("to")?.value;
@@ -162,6 +178,7 @@ box-sizing: border-box;
     const count = filtered.length;
     if (count === 0) {
       document.getElementById("count").textContent = "データなし";
+      document.getElementById("list").innerHTML = "";
       return;
     }
 
@@ -187,6 +204,7 @@ box-sizing: border-box;
     document.getElementById("last").textContent = "ラス率: " + (last*100).toFixed(1) + "%";
 
     drawCharts(filtered);
+    renderList();
   }
 
   // グラフ描画
@@ -200,7 +218,6 @@ box-sizing: border-box;
     if (lineChart) lineChart.destroy();
     if (pieChart) pieChart.destroy();
 
-    // 折れ線グラフ
     lineChart = new Chart(ctx1, {
       type: "line",
       data: {
@@ -226,7 +243,6 @@ box-sizing: border-box;
       }
     });
 
-    // 円グラフ
     const top = data.filter(x => x.rank === 1).length;
     const second = data.filter(x => x.rank === 2).length;
     const third = data.filter(x => x.rank === 3).length;
@@ -242,6 +258,55 @@ box-sizing: border-box;
         }]
       }
     });
+  }
+
+  // 一覧表示
+  function renderList() {
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    results.forEach((game, index) => {
+      const div = document.createElement("div");
+      div.style.padding = "10px 0";
+      div.style.borderBottom = "1px solid #ddd";
+
+      div.innerHTML = `
+        <p>${index + 1}局目 ｜ 着順: ${game.rank} ｜ 点数: ${game.score} ｜ 日付: ${game.date}</p>
+        <button class="small-btn edit-btn" onclick="editGame(${index})">編集</button>
+        <button class="small-btn delete-btn" onclick="deleteGame(${index})">削除</button>
+      `;
+
+      list.appendChild(div);
+    });
+  }
+
+  // 削除
+  function deleteGame(index) {
+    if (!confirm("削除しますか？")) return;
+
+    results.splice(index, 1);
+    localStorage.setItem("results", JSON.stringify(results));
+    updateStats();
+  }
+
+  // 編集
+  function editGame(index) {
+    const game = results[index];
+
+    const newRank = prompt("新しい着順 (1〜4)", game.rank);
+    const newScore = prompt("新しい点数", game.score);
+    const newDate = prompt("新しい日付 (YYYY-MM-DD)", game.date);
+
+    if (!newRank || newRank < 1 || newRank > 4) return alert("着順が不正です");
+
+    results[index] = {
+      rank: Number(newRank),
+      score: Number(newScore),
+      date: newDate
+    };
+
+    localStorage.setItem("results", JSON.stringify(results));
+    updateStats();
   }
 
   // バックアップ保存
