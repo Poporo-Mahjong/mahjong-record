@@ -8,10 +8,48 @@
 <style>
   body { font-family: sans-serif; background: #f2f2f7; margin: 0; padding: 20px; }
   .container { max-width: 500px; margin: auto; }
-  .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-  input, button { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #ccc; font-size: 18px; }
-  button { background: #4CAF50; color: white; border: none; font-weight: bold; cursor: pointer; }
+  .card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+
+  input, button {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 18px;
+  }
+
+  button {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
   button:active { background: #45a049; }
+
+  /* バックアップボタン（横並び） */
+  .backup-btn {
+    width: 48%;
+    display: inline-block;
+    padding: 14px;
+    margin: 5px 1%;
+    font-size: 16px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    background: #4CAF50;
+    color: white;
+    border: none;
+  }
 </style>
 </head>
 
@@ -54,6 +92,12 @@
 
   <div class="card">
     <button onclick="location.href='list.html'">対局一覧ページへ</button>
+  </div>
+
+  <div class="card">
+    <button class="backup-btn" onclick="backup()">バックアップ保存</button>
+    <button class="backup-btn" onclick="restore()">バックアップ読み込み</button>
+    <input type="file" id="fileInput" style="display:none" onchange="restoreFile(event)">
   </div>
 
 </div>
@@ -111,7 +155,7 @@
     if (lineChart) lineChart.destroy();
     if (pieChart) pieChart.destroy();
 
-    lineChart = new Chart(lineChart.getContext("2d"), {
+    lineChart = new Chart(document.getElementById("lineChart"), {
       type: "line",
       data: { labels, datasets: [{ label:"着順", data:ranks, borderColor:"#4CAF50" }] },
       options: { scales:{ y:{ reverse:true, min:1, max:4, ticks:{stepSize:1} } } }
@@ -122,10 +166,42 @@
     const third = data.filter(x=>x.rank===3).length;
     const last = data.filter(x=>x.rank===4).length;
 
-    pieChart = new Chart(pieChart.getContext("2d"), {
+    pieChart = new Chart(document.getElementById("pieChart"), {
       type:"pie",
       data:{ labels:["1位","2位","3位","4位"], datasets:[{ data:[top,second,third,last] }] }
     });
+  }
+
+  function backup() {
+    const blob = new Blob([JSON.stringify(results, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "mahjong_backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function restore() {
+    document.getElementById("fileInput").click();
+  }
+
+  function restoreFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        results = JSON.parse(e.target.result);
+        localStorage.setItem("results", JSON.stringify(results));
+        updateStats();
+        alert("バックアップを読み込みました");
+      } catch {
+        alert("読み込みに失敗しました");
+      }
+    };
+    reader.readAsText(file);
   }
 
   updateStats();
