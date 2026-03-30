@@ -91,11 +91,11 @@
     <p id="count"></p>
     <p id="avg"></p>
     <p id="avgScore"></p>
-    <p id="topRate"></p>
-    <p id="secondRate"></p>
-    <p id="thirdRate"></p>
-    <p id="renRate"></p>
-    <p id="lastRate"></p>
+    <p id="top"></p>
+    <p id="second"></p>
+    <p id="third"></p>
+    <p id="ren"></p>
+    <p id="last"></p>
   </div>
 
   <div class="card">
@@ -154,12 +154,11 @@
     count.textContent = "対局数: " + filtered.length;
     avg.textContent = "平均着順: " + (ranks.reduce((a,b)=>a+b)/filtered.length).toFixed(2);
     avgScore.textContent = "平均点数: " + (scores.reduce((a,b)=>a+b)/filtered.length).toFixed(0);
-
-    topRate.textContent = "トップ率: " + (ranks.filter(x=>x===1).length/filtered.length*100).toFixed(1) + "%";
-    secondRate.textContent = "2位率: " + (ranks.filter(x=>x===2).length/filtered.length*100).toFixed(1) + "%";
-    thirdRate.textContent = "3位率: " + (ranks.filter(x=>x===3).length/filtered.length*100).toFixed(1) + "%";
-    renRate.textContent = "連帯率: " + ((ranks.filter(x=>x===1).length+ranks.filter(x=>x===2).length)/filtered.length*100).toFixed(1) + "%";
-    lastRate.textContent = "ラス率: " + (ranks.filter(x=>x===4).length/filtered.length*100).toFixed(1) + "%";
+    top.textContent = "トップ率: " + (ranks.filter(x=>x===1).length/filtered.length*100).toFixed(1) + "%";
+    second.textContent = "2位率: " + (ranks.filter(x=>x===2).length/filtered.length*100).toFixed(1) + "%";
+    third.textContent = "3位率: " + (ranks.filter(x=>x===3).length/filtered.length*100).toFixed(1) + "%";
+    ren.textContent = "連帯率: " + ((ranks.filter(x=>x===1).length+ranks.filter(x=>x===2).length)/filtered.length*100).toFixed(1) + "%";
+    last.textContent = "ラス率: " + (ranks.filter(x=>x===4).length/filtered.length*100).toFixed(1) + "%";
 
     drawCharts(filtered);
     renderList(filtered);
@@ -191,12 +190,11 @@
     });
   }
 
-  /* ★ 最新20試合を新しい順に表示 ★ */
   function renderList(data) {
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    const latest = data.slice(-20).reverse();
+    const latest = data.slice(-20);
 
     latest.forEach((g, i) => {
       const realIndex = results.indexOf(g);
