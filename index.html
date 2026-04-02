@@ -124,9 +124,9 @@
   let results = JSON.parse(localStorage.getItem("results") || "[]");
 
   function addGame() {
-    const r = Number(rank.value);
-    const s = Number(score.value || 0);
-    const d = date.value || new Date().toISOString().slice(0,10);
+    const r = Number(document.getElementById("rank").value);
+    const s = Number(document.getElementById("score").value || 0);
+    const d = document.getElementById("date").value || new Date().toISOString().slice(0,10);
     if (r < 1 || r > 4) return;
 
     results.push({ rank: r, score: s, date: d });
@@ -142,26 +142,50 @@
     if (from) filtered = filtered.filter(x => x.date >= from);
     if (to) filtered = filtered.filter(x => x.date <= to);
 
+    const countEl   = document.getElementById("count");
+    const avgEl     = document.getElementById("avg");
+    const avgScoreEl= document.getElementById("avgScore");
+    const topEl     = document.getElementById("top");
+    const secondEl  = document.getElementById("second");
+    const thirdEl   = document.getElementById("third");
+    const renEl     = document.getElementById("ren");
+    const lastEl    = document.getElementById("last");
+
     if (filtered.length === 0) {
-      count.textContent = "データなし";
+      countEl.textContent = "データなし";
+      avgEl.textContent = "";
+      avgScoreEl.textContent = "";
+      topEl.textContent = "";
+      secondEl.textContent = "";
+      thirdEl.textContent = "";
+      renEl.textContent = "";
+      lastEl.textContent = "";
       document.getElementById("list").innerHTML = "";
+      if (lineChart) lineChart.destroy();
+      if (pieChart) pieChart.destroy();
       return;
     }
 
     const ranks = filtered.map(x => x.rank);
     const scores = filtered.map(x => x.score);
 
-    count.textContent = "対局数: " + filtered.length;
-    avg.textContent = "平均着順: " + (ranks.reduce((a,b)=>a+b)/filtered.length).toFixed(2);
-    avgScore.textContent = "平均点数: " + (scores.reduce((a,b)=>a+b)/filtered.length).toFixed(0);
-    top.textContent = "トップ率: " + (ranks.filter(x=>x===1).length/filtered.length*100).toFixed(1) + "%";
-    second.textContent = "2位率: " + (ranks.filter(x=>x===2).length/filtered.length*100).toFixed(1) + "%";
-    third.textContent = "3位率: " + (ranks.filter(x=>x===3).length/filtered.length*100).toFixed(1) + "%";
-    ren.textContent = "連帯率: " + ((ranks.filter(x=>x===1).length+ranks.filter(x=>x===2).length)/filtered.length*100).toFixed(1) + "%";
-    last.textContent = "ラス率: " + (ranks.filter(x=>x===4).length/filtered.length*100).toFixed(1) + "%";
+    countEl.textContent = "対局数: " + filtered.length;
+    avgEl.textContent = "平均着順: " + (ranks.reduce((a,b)=>a+b)/filtered.length).toFixed(2);
+    avgScoreEl.textContent = "平均点数: " + (scores.reduce((a,b)=>a+b)/filtered.length).toFixed(0);
+
+    const topCount    = ranks.filter(x=>x===1).length;
+    const secondCount = ranks.filter(x=>x===2).length;
+    const thirdCount  = ranks.filter(x=>x===3).length;
+    const lastCount   = ranks.filter(x=>x===4).length;
+
+    topEl.textContent    = "トップ率: " + (topCount/filtered.length*100).toFixed(1) + "%";
+    secondEl.textContent = "2位率: "   + (secondCount/filtered.length*100).toFixed(1) + "%";
+    thirdEl.textContent  = "3位率: "   + (thirdCount/filtered.length*100).toFixed(1) + "%";
+    renEl.textContent    = "連帯率: "  + ((topCount+secondCount)/filtered.length*100).toFixed(1) + "%";
+    lastEl.textContent   = "ラス率: "  + (lastCount/filtered.length*100).toFixed(1) + "%";
 
     drawCharts(filtered);
-    renderList(filtered);
+    renderList();
   }
 
   let lineChart, pieChart;
@@ -190,18 +214,15 @@
     });
   }
 
-  function renderList(data) {
+  function renderList() {
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    // ★ results を日付の新しい順にソート
+    // 日付の新しい順にソートして最新20件
     const sortedResults = [...results].sort((a, b) => b.date.localeCompare(a.date));
-
-    // ★ 最新20件
     const latest = sortedResults.slice(0, 20);
 
     latest.forEach((g) => {
-      // ★ 正しい index を取得
       const realIndex = results.indexOf(g);
 
       const div = document.createElement("div");
