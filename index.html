@@ -194,13 +194,14 @@
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    // ★ 修正：日付の新しい順にソート
-    const sorted = [...data].sort((a,b)=> b.date.localeCompare(a.date));
+    // ★ results を日付の新しい順にソート
+    const sortedResults = [...results].sort((a, b) => b.date.localeCompare(a.date));
 
-    // ★ 修正：新しい順で20件
-    const latest = sorted.slice(0, 20);
+    // ★ 最新20件
+    const latest = sortedResults.slice(0, 20);
 
     latest.forEach((g) => {
+      // ★ 正しい index を取得
       const realIndex = results.indexOf(g);
 
       const div = document.createElement("div");
