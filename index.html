@@ -194,9 +194,13 @@
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    const latest = data.slice(-20);
+    // ★ 修正：日付の新しい順にソート
+    const sorted = [...data].sort((a,b)=> b.date.localeCompare(a.date));
 
-    latest.forEach((g, i) => {
+    // ★ 修正：新しい順で20件
+    const latest = sorted.slice(0, 20);
+
+    latest.forEach((g) => {
       const realIndex = results.indexOf(g);
 
       const div = document.createElement("div");
