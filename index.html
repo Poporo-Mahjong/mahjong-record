@@ -218,21 +218,22 @@
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    // 日付の新しい順にソートして最新20件
-    const sortedResults = [...results].sort((a, b) => b.date.localeCompare(a.date));
+    // 元の index を保持してソート
+    const sortedResults = results
+      .map((g, i) => ({ ...g, index: i }))
+      .sort((a, b) => b.date.localeCompare(a.date));
+
     const latest = sortedResults.slice(0, 20);
 
     latest.forEach((g) => {
-      const realIndex = results.indexOf(g);
-
       const div = document.createElement("div");
       div.style.borderBottom = "1px solid #ddd";
       div.style.padding = "10px 0";
 
       div.innerHTML = `
-        <p>${realIndex + 1}局目 ｜ 着順:${g.rank} ｜ 点数:${g.score} ｜ 日付:${g.date}</p>
-        <button class="small-btn edit-btn" onclick="editGame(${realIndex})">編集</button>
-        <button class="small-btn delete-btn" onclick="deleteGame(${realIndex})">削除</button>
+        <p>${g.index + 1}局目 ｜ 着順:${g.rank} ｜ 点数:${g.score} ｜ 日付:${g.date}</p>
+        <button class="small-btn edit-btn" onclick="editGame(${g.index})">編集</button>
+        <button class="small-btn delete-btn" onclick="deleteGame(${g.index})">削除</button>
       `;
 
       list.appendChild(div);
