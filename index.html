@@ -91,6 +91,7 @@
     <p id="count"></p>
     <p id="avg"></p>
     <p id="avgScore"></p>
+    <p id="totalScore"></p>
     <p id="top"></p>
     <p id="second"></p>
     <p id="third"></p>
@@ -145,6 +146,7 @@
     const countEl   = document.getElementById("count");
     const avgEl     = document.getElementById("avg");
     const avgScoreEl= document.getElementById("avgScore");
+    const totalScoreEl = document.getElementById("totalScore");
     const topEl     = document.getElementById("top");
     const secondEl  = document.getElementById("second");
     const thirdEl   = document.getElementById("third");
@@ -155,6 +157,7 @@
       countEl.textContent = "データなし";
       avgEl.textContent = "";
       avgScoreEl.textContent = "";
+      totalScoreEl.textContent = "";
       topEl.textContent = "";
       secondEl.textContent = "";
       thirdEl.textContent = "";
@@ -172,6 +175,7 @@
     countEl.textContent = "対局数: " + filtered.length;
     avgEl.textContent = "平均着順: " + (ranks.reduce((a,b)=>a+b)/filtered.length).toFixed(2);
     avgScoreEl.textContent = "平均点数: " + (scores.reduce((a,b)=>a+b)/filtered.length).toFixed(0);
+    totalScoreEl.textContent = "合計点数: " + scores.reduce((a,b)=>a+b, 0);
 
     const topCount    = ranks.filter(x=>x===1).length;
     const secondCount = ranks.filter(x=>x===2).length;
@@ -218,10 +222,15 @@
     const list = document.getElementById("list");
     list.innerHTML = "";
 
-    // 元の index を保持してソート
+    // 元の index を保持してソート（同じ日でも新しい順）
     const sortedResults = results
       .map((g, i) => ({ ...g, index: i }))
-      .sort((a, b) => b.date.localeCompare(a.date));
+      .sort((a, b) => {
+        if (a.date !== b.date) {
+          return b.date.localeCompare(a.date); // 日付が新しい順
+        }
+        return b.index - a.index; // 同じ日なら後に追加された方が先
+      });
 
     const latest = sortedResults.slice(0, 20);
 
